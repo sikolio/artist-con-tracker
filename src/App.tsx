@@ -49,14 +49,13 @@ type AnalysisResult = {
 
 function App() {
   const initialPreferences = useMemo(() => loadAppPreferences(), [])
+  const initialDecklist = initialPreferences.decklist ?? sampleDecklist
   const [selectedConventionId, setSelectedConventionId] = useState(
     getInitialConventionId(initialPreferences.selectedConventionId),
   )
-  const [decklist, setDecklist] = useState(
-    initialPreferences.decklist ?? sampleDecklist,
-  )
+  const [decklist, setDecklist] = useState(initialDecklist)
   const [exactPrintingMode, setExactPrintingMode] = useState(
-    initialPreferences.exactPrintingMode ?? false,
+    initialPreferences.exactPrintingMode ?? decklistHasPrintingHints(initialDecklist),
   )
   const [selectedArtist, setSelectedArtist] = useState('Mark Tedin')
   const [artistSearch, setArtistSearch] = useState('')
@@ -651,6 +650,10 @@ function getInitialConventionId(preferredConventionId: string | undefined) {
   return conventions.some((candidate) => candidate.id === preferredConventionId)
     ? preferredConventionId!
     : conventions[0].id
+}
+
+function decklistHasPrintingHints(decklist: string) {
+  return parseDecklist(decklist).some((card) => card.printing)
 }
 
 function CopyPlanColumn({

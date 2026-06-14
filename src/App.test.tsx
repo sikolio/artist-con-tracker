@@ -13,7 +13,7 @@ describe('App', () => {
     const decklistInput = screen.getByLabelText(/decklist/i) as HTMLTextAreaElement
 
     expect(decklistInput.value).toContain('Sol Ring (ME4) 227')
-    expect(screen.getByRole('checkbox', { name: /exact printing mode/i })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /exact printing mode/i })).toBeChecked()
     expect(screen.getByRole('searchbox', { name: /artist search/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Mark Tedin/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /refresh card data/i })).toBeInTheDocument()
