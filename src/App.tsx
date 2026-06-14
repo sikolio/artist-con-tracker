@@ -16,7 +16,11 @@ import { conventions } from './data/conventions'
 import { getArtistProfile } from './lib/artistProfiles'
 import { parseDecklist, normalizeCardName } from './lib/decklist'
 import { buildChecklistCsv } from './lib/exportChecklist'
-import { loadAppPreferences, saveAppPreferences } from './lib/preferences'
+import {
+  loadAppPreferences,
+  migrateAppPreferences,
+  saveAppPreferences,
+} from './lib/preferences'
 import {
   findMatchedAttendingArtists,
   findSignableCards,
@@ -41,6 +45,17 @@ const sampleDecklist = `1 Sol Ring (ME4) 227
 1 Rhystic Study
 1 Damnation`
 
+const legacySampleDecklists = [
+  `1 Sol Ring
+1 Counterspell
+1 Birds of Paradise
+1 Lightning Bolt
+1 Ponder
+1 Swords to Plowshares
+1 Rhystic Study
+1 Damnation`,
+]
+
 type AnalysisResult = {
   signableCards: SignableCard[]
   missingCards: string[]
@@ -48,7 +63,14 @@ type AnalysisResult = {
 }
 
 function App() {
-  const initialPreferences = useMemo(() => loadAppPreferences(), [])
+  const initialPreferences = useMemo(
+    () =>
+      migrateAppPreferences(loadAppPreferences(), {
+        currentSampleDecklist: sampleDecklist,
+        legacySampleDecklists,
+      }),
+    [],
+  )
   const initialDecklist = initialPreferences.decklist ?? sampleDecklist
   const [selectedConventionId, setSelectedConventionId] = useState(
     getInitialConventionId(initialPreferences.selectedConventionId),

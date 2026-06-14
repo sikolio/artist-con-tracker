@@ -1,8 +1,13 @@
-import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, it } from 'vitest'
 import App from './App'
 
 describe('App', () => {
+  beforeEach(() => {
+    cleanup()
+    localStorage.clear()
+  })
+
   it('renders the signature finder workspace with convention details', () => {
     render(<App />)
 
@@ -24,5 +29,30 @@ describe('App', () => {
     expect(screen.getByRole('heading', { name: /copy plan/i })).toBeInTheDocument()
     expect(screen.getByText(/booth/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /check deck/i })).toBeInTheDocument()
+  })
+
+  it('migrates a saved bundled sample decklist after app updates', () => {
+    localStorage.setItem(
+      'card-artist-tracker:preferences',
+      JSON.stringify({
+        decklist: `1 Sol Ring
+1 Counterspell
+1 Birds of Paradise
+1 Lightning Bolt
+1 Ponder
+1 Swords to Plowshares
+1 Rhystic Study
+1 Damnation`,
+        exactPrintingMode: false,
+        selectedConventionId: 'scg-con-las-vegas-2026',
+      }),
+    )
+
+    render(<App />)
+
+    const decklistInput = screen.getByLabelText(/decklist/i) as HTMLTextAreaElement
+
+    expect(decklistInput.value).toContain('Sol Ring (ME4) 227')
+    expect(screen.getByRole('checkbox', { name: /exact printing mode/i })).toBeChecked()
   })
 })
