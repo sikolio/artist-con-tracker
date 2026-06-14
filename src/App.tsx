@@ -32,12 +32,12 @@ import {
 } from './lib/scryfall'
 import type { SignableCard } from './lib/types'
 
-const sampleDecklist = `1 Sol Ring
-1 Counterspell
-1 Birds of Paradise
-1 Lightning Bolt
-1 Ponder
-1 Swords to Plowshares
+const sampleDecklist = `1 Sol Ring (ME4) 227
+1 Counterspell (VMA) 61
+1 Birds of Paradise (M11) 168
+1 Lightning Bolt (ME1) 100
+1 Ponder (M10) 68
+1 Swords to Plowshares (BRC) 111
 1 Rhystic Study
 1 Damnation`
 
