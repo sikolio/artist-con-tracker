@@ -506,6 +506,106 @@ summary:focus-visible {
   background: #ffffff;
 }
 
+.premium-preview {
+  border: 1px solid #b2ddff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  background: #f5fbff;
+}
+
+.premium-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 6px 10px;
+  color: #0b4a6f;
+  background: #d1e9ff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.premium-copy {
+  margin-top: 10px;
+  color: #475467;
+  font-size: 0.92rem;
+}
+
+.premium-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.premium-suggestion-card {
+  min-width: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+.premium-suggestion-card > div,
+.premium-suggestion-card li {
+  display: grid;
+  gap: 3px;
+}
+
+.premium-suggestion-card strong,
+.premium-suggestion-card span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.premium-suggestion-card > div strong {
+  color: #101828;
+}
+
+.premium-suggestion-card > div span,
+.premium-suggestion-card li span,
+.premium-suggestion-card small {
+  color: #667085;
+  font-size: 0.82rem;
+}
+
+.premium-suggestion-card p {
+  margin-top: 10px;
+  color: #0b4a6f;
+  font-weight: 800;
+}
+
+.premium-suggestion-card ul {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.premium-suggestion-card li {
+  border-top: 1px solid #eef2f6;
+  padding-top: 8px;
+}
+
+.premium-suggestion-card li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.premium-suggestion-card li strong {
+  color: #182230;
+}
+
+.premium-suggestion-card small {
+  display: block;
+  margin-top: 10px;
+  font-weight: 800;
+}
+
 .copy-plan-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -865,7 +965,8 @@ summary:focus-visible {
 
   .event-strip,
   .summary-row,
-  .copy-plan-grid {
+  .copy-plan-grid,
+  .premium-suggestion-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -928,7 +1029,8 @@ summary:focus-visible {
   .event-strip,
   .summary-row,
   .result-list,
-  .copy-plan-grid {
+  .copy-plan-grid,
+  .premium-suggestion-grid {
     grid-template-columns: 1fr;
   }
 

@@ -4,6 +4,7 @@ import {
   Download,
   ExternalLink,
   LoaderCircle,
+  LockKeyhole,
   PackageCheck,
   Printer,
   RefreshCw,
@@ -21,6 +22,10 @@ import {
   migrateAppPreferences,
   saveAppPreferences,
 } from './lib/preferences'
+import {
+  buildPremiumConventionSuggestions,
+  type PremiumConventionSuggestion,
+} from './lib/premiumSuggestions'
 import {
   findMatchedAttendingArtists,
   findSignableCards,
@@ -58,6 +63,7 @@ const legacySampleDecklists = [
 
 type AnalysisResult = {
   signableCards: SignableCard[]
+  premiumSuggestions: PremiumConventionSuggestion[]
   missingCards: string[]
   checkedCardCount: number
 }
@@ -196,9 +202,18 @@ function App() {
         convention.artists,
         { exactMode: exactPrintingMode },
       )
+      const premiumSuggestions = buildPremiumConventionSuggestions({
+        deck: parsedDeck,
+        printingsByName: lookup.printingsByName,
+        currentSignableCards: signableCards,
+        conventions,
+        selectedConventionId: convention.id,
+        exactMode: exactPrintingMode,
+      })
 
       setResult({
         signableCards,
+        premiumSuggestions,
         missingCards: lookup.missingCards,
         checkedCardCount: parsedDeck.length,
       })
@@ -525,6 +540,51 @@ function App() {
             />
           </div>
         </section>
+
+        {result?.premiumSuggestions.length ? (
+          <section className="premium-preview" aria-label="Premium convention coverage preview">
+            <div className="panel-heading">
+              <div>
+                <p className="label">Premium preview</p>
+                <h2>Multi-con coverage</h2>
+              </div>
+              <span className="premium-pill">
+                <LockKeyhole aria-hidden="true" size={14} />
+                Premium
+              </span>
+            </div>
+            <p className="premium-copy">
+              Compare nearby conventions to find the missed cards your current guest list cannot cover.
+            </p>
+            <div className="premium-suggestion-grid">
+              {result.premiumSuggestions.map((suggestion) => (
+                <article className="premium-suggestion-card" key={suggestion.conventionId}>
+                  <div>
+                    <strong>{suggestion.conventionName}</strong>
+                    <span>
+                      {suggestion.dateRange} - {suggestion.location}
+                    </span>
+                  </div>
+                  <p>
+                    Would add {suggestion.coveredCards.length} card
+                    {suggestion.coveredCards.length === 1 ? '' : 's'}
+                  </p>
+                  <ul>
+                    {suggestion.coveredCards.slice(0, 4).map((card) => (
+                      <li key={`${suggestion.conventionId}-${card.cardName}`}>
+                        <strong>{card.cardName}</strong>
+                        <span>{card.artists.join(', ')}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {suggestion.coveredCards.length > 4 ? (
+                    <small>+{suggestion.coveredCards.length - 4} more cards</small>
+                  ) : null}
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         {!result ? (
           <div className="empty-results">
