@@ -9,6 +9,7 @@ export type ScryfallCache = {
 }
 
 const scryfallCachePrefix = 'card-artist-tracker:scryfall:'
+const scryfallSearchRequestGapMs = 500
 
 export function createLocalStorageScryfallCache(
   storage = getBrowserStorage(),
@@ -96,9 +97,15 @@ export async function fetchPrintingsForDeck(
 ): Promise<LookupResult> {
   const printingsByName = new Map<string, ScryfallPrinting[]>()
   const missingCards: string[] = []
+  let lastSearchRequestAt = 0
 
   for (const entry of deck) {
     const key = normalizeCardName(entry.name)
+
+    if (printingsByName.has(key)) {
+      continue
+    }
+
     const cachedPrintings = cache?.get(key)
 
     if (cachedPrintings) {
@@ -107,7 +114,17 @@ export async function fetchPrintingsForDeck(
     }
 
     try {
+      const waitMs = Math.max(
+        lastSearchRequestAt + scryfallSearchRequestGapMs - Date.now(),
+        0,
+      )
+
+      if (waitMs > 0) {
+        await delay(waitMs, signal)
+      }
+
       const printings = await fetchPrintingsForCard(entry.name, signal, fetcher)
+      lastSearchRequestAt = Date.now()
       printingsByName.set(key, printings)
       cache?.set(key, printings)
     } catch {
@@ -117,6 +134,26 @@ export async function fetchPrintingsForDeck(
   }
 
   return { printingsByName, missingCards }
+}
+
+function delay(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'))
+      return
+    }
+
+    const timeoutId = window.setTimeout(resolve, ms)
+
+    signal?.addEventListener(
+      'abort',
+      () => {
+        window.clearTimeout(timeoutId)
+        reject(new DOMException('Aborted', 'AbortError'))
+      },
+      { once: true },
+    )
+  })
 }
 
 async function fetchPrintingsForCard(

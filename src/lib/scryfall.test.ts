@@ -76,6 +76,79 @@ describe('fetchPrintingsForDeck', () => {
     expect(result.printingsByName.get('sol ring')).toEqual([apiPrinting])
     expect(cache.set).toHaveBeenCalledWith('sol ring', [apiPrinting])
   })
+
+  it('reuses one lookup for duplicate card names in the same deck check', async () => {
+    const cache: ScryfallCache = {
+      get: vi.fn(() => undefined),
+      set: vi.fn(),
+    }
+    const fetcher = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({
+        has_more: false,
+        data: [
+          {
+            id: 'sol-ring-api',
+            name: 'Sol Ring',
+            artist: 'Mark Tedin',
+            set: 'me4',
+            set_name: 'Masters Edition IV',
+            collector_number: '227',
+            scryfall_uri: 'https://scryfall.com/card/me4/227/sol-ring',
+          },
+        ],
+      }),
+    })) as unknown as typeof fetch
+
+    const result = await fetchPrintingsForDeck(
+      [
+        {
+          name: 'Sol Ring',
+          quantity: 1,
+          printing: { setCode: 'ME4', collectorNumber: '227' },
+        },
+        {
+          name: 'Sol Ring',
+          quantity: 1,
+          printing: { setCode: 'CMM', collectorNumber: '400' },
+        },
+      ],
+      undefined,
+      fetcher,
+      cache,
+    )
+
+    expect(fetcher).toHaveBeenCalledTimes(1)
+    expect(result.printingsByName.get('sol ring')).toEqual([apiPrinting])
+    expect(cache.set).toHaveBeenCalledTimes(1)
+  })
+
+  it('spaces uncached Scryfall search requests to respect the search rate limit', async () => {
+    vi.useFakeTimers()
+
+    const fetcher = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ has_more: false, data: [] }),
+    })) as unknown as typeof fetch
+    const lookup = fetchPrintingsForDeck(
+      [
+        { name: 'Sol Ring', quantity: 1 },
+        { name: 'Counterspell', quantity: 1 },
+      ],
+      undefined,
+      fetcher,
+    )
+
+    await vi.waitFor(() => expect(fetcher).toHaveBeenCalledTimes(1))
+    await vi.advanceTimersByTimeAsync(499)
+    expect(fetcher).toHaveBeenCalledTimes(1)
+
+    await vi.advanceTimersByTimeAsync(1)
+    await lookup
+
+    expect(fetcher).toHaveBeenCalledTimes(2)
+    vi.useRealTimers()
+  })
 })
 
 describe('createLocalStorageScryfallCache', () => {
