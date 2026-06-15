@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildPremiumConventionSuggestions } from './premiumSuggestions'
+import {
+  buildPremiumConventionSuggestions,
+  buildPremiumSuggestionTeaser,
+} from './premiumSuggestions'
 import type { Convention, DeckEntry, ScryfallPrinting, SignableCard } from './types'
 
 const deck: DeckEntry[] = [
@@ -110,6 +113,62 @@ describe('buildPremiumConventionSuggestions', () => {
         ],
       },
     ])
+  })
+})
+
+describe('buildPremiumSuggestionTeaser', () => {
+  it('reveals one convention and one card while locking the rest of the coverage', () => {
+    const suggestions = buildPremiumConventionSuggestions({
+      deck,
+      printingsByName,
+      currentSignableCards,
+      conventions,
+      selectedConventionId: 'current',
+    })
+
+    expect(buildPremiumSuggestionTeaser(suggestions)).toEqual({
+      visibleSuggestion: {
+        conventionId: 'combo-con',
+        conventionName: 'Combo CON',
+        dateRange: 'Soon',
+        location: 'Somewhere',
+        coveredCard: {
+          cardName: 'Lightning Bolt',
+          artists: ['Christopher Rush'],
+        },
+      },
+      lockedMatchCount: 3,
+      lockedConventionCount: 2,
+    })
+  })
+
+  it('counts locked duplicate-card convention coverage as hidden matches', () => {
+    const suggestions = [
+      {
+        conventionId: 'poole-dallas',
+        conventionName: 'Poole Dallas',
+        dateRange: 'Soon',
+        location: 'Somewhere',
+        coveredCards: [
+          { cardName: 'Birds of Paradise', artists: ['Mark Poole'] },
+        ],
+      },
+      {
+        conventionId: 'poole-la',
+        conventionName: 'Poole LA',
+        dateRange: 'Later',
+        location: 'Elsewhere',
+        coveredCards: [
+          { cardName: 'Birds of Paradise', artists: ['Mark Poole'] },
+        ],
+      },
+    ]
+
+    expect(buildPremiumSuggestionTeaser(suggestions)?.lockedMatchCount).toBe(1)
+  })
+
+  it('returns no teaser when there are no premium suggestions', () => {
+    expect(buildPremiumSuggestionTeaser([])).toBeNull()
   })
 })
 

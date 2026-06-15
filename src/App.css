@@ -534,7 +534,7 @@ summary:focus-visible {
 
 .premium-suggestion-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
   gap: 12px;
   margin-top: 14px;
 }
@@ -604,6 +604,57 @@ summary:focus-visible {
   display: block;
   margin-top: 10px;
   font-weight: 800;
+}
+
+.premium-locked-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-content: start;
+  gap: 12px;
+  min-width: 0;
+  border: 1px dashed #84caff;
+  border-radius: 8px;
+  padding: 14px;
+  background: #eff8ff;
+}
+
+.premium-lock-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  color: #0b4a6f;
+  background: #d1e9ff;
+}
+
+.premium-locked-card strong {
+  color: #101828;
+}
+
+.premium-locked-card p {
+  margin-top: 6px;
+  color: #475467;
+  font-size: 0.92rem;
+}
+
+.premium-action {
+  grid-column: 1 / -1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 14px;
+  color: #ffffff;
+  background: #0b4a6f;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.premium-action:hover {
+  background: #083852;
 }
 
 .copy-plan-grid {

@@ -24,7 +24,8 @@ import {
 } from './lib/preferences'
 import {
   buildPremiumConventionSuggestions,
-  type PremiumConventionSuggestion,
+  buildPremiumSuggestionTeaser,
+  type PremiumSuggestionTeaser,
 } from './lib/premiumSuggestions'
 import {
   findMatchedAttendingArtists,
@@ -63,7 +64,7 @@ const legacySampleDecklists = [
 
 type AnalysisResult = {
   signableCards: SignableCard[]
-  premiumSuggestions: PremiumConventionSuggestion[]
+  premiumTeaser: PremiumSuggestionTeaser | null
   missingCards: string[]
   checkedCardCount: number
 }
@@ -210,10 +211,11 @@ function App() {
         selectedConventionId: convention.id,
         exactMode: exactPrintingMode,
       })
+      const premiumTeaser = buildPremiumSuggestionTeaser(premiumSuggestions)
 
       setResult({
         signableCards,
-        premiumSuggestions,
+        premiumTeaser,
         missingCards: lookup.missingCards,
         checkedCardCount: parsedDeck.length,
       })
@@ -541,7 +543,7 @@ function App() {
           </div>
         </section>
 
-        {result?.premiumSuggestions.length ? (
+        {result?.premiumTeaser ? (
           <section className="premium-preview" aria-label="Premium convention coverage preview">
             <div className="panel-heading">
               <div>
@@ -554,34 +556,41 @@ function App() {
               </span>
             </div>
             <p className="premium-copy">
-              Compare nearby conventions to find the missed cards your current guest list cannot cover.
+              One other convention can cover a missed card from this deck. Unlock the full comparison to see the rest.
             </p>
             <div className="premium-suggestion-grid">
-              {result.premiumSuggestions.map((suggestion) => (
-                <article className="premium-suggestion-card" key={suggestion.conventionId}>
-                  <div>
-                    <strong>{suggestion.conventionName}</strong>
-                    <span>
-                      {suggestion.dateRange} - {suggestion.location}
-                    </span>
-                  </div>
+              <article className="premium-suggestion-card">
+                <div>
+                  <strong>{result.premiumTeaser.visibleSuggestion.conventionName}</strong>
+                  <span>
+                    {result.premiumTeaser.visibleSuggestion.dateRange} - {result.premiumTeaser.visibleSuggestion.location}
+                  </span>
+                </div>
+                <p>Example match</p>
+                <ul>
+                  <li>
+                    <strong>{result.premiumTeaser.visibleSuggestion.coveredCard.cardName}</strong>
+                    <span>{result.premiumTeaser.visibleSuggestion.coveredCard.artists.join(', ')}</span>
+                  </li>
+                </ul>
+              </article>
+              <article className="premium-locked-card">
+                <div className="premium-lock-icon" aria-hidden="true">
+                  <LockKeyhole size={20} />
+                </div>
+                <div>
+                  <strong>Want the rest?</strong>
                   <p>
-                    Would add {suggestion.coveredCards.length} card
-                    {suggestion.coveredCards.length === 1 ? '' : 's'}
+                    Unlock {result.premiumTeaser.lockedMatchCount} more match
+                    {result.premiumTeaser.lockedMatchCount === 1 ? '' : 'es'} and{' '}
+                    {result.premiumTeaser.lockedConventionCount} more convention option
+                    {result.premiumTeaser.lockedConventionCount === 1 ? '' : 's'}.
                   </p>
-                  <ul>
-                    {suggestion.coveredCards.slice(0, 4).map((card) => (
-                      <li key={`${suggestion.conventionId}-${card.cardName}`}>
-                        <strong>{card.cardName}</strong>
-                        <span>{card.artists.join(', ')}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  {suggestion.coveredCards.length > 4 ? (
-                    <small>+{suggestion.coveredCards.length - 4} more cards</small>
-                  ) : null}
-                </article>
-              ))}
+                </div>
+                <button className="premium-action" type="button">
+                  Unlock full comparison
+                </button>
+              </article>
             </div>
           </section>
         ) : null}
